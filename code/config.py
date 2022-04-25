@@ -1,3 +1,4 @@
+import torch
 dropout = 0.1
 train_data_file = '../feature/names_train16.csv'
 test_index_file='../feature/test_index.pkl'

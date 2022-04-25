@@ -1,4 +1,4 @@
-
+from config import *
 from transformers import PreTrainedTokenizerFast
 #注意这里用了另外一种方式加载Tokenizer
 tokenizer = PreTrainedTokenizerFast(tokenizer_file="../user_data/tokenizer-my-Whitespace.json")

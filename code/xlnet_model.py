@@ -5,7 +5,7 @@ from transformers import PreTrainedTokenizerFast
 from transformers import XLNetForSequenceClassification, TrainingArguments, Trainer
 import numpy as np
 from sklearn.model_selection import  StratifiedKFold
-
+from config import *
 
 def data_preprocess():
     rawdata = pd.read_csv(train_data_file, encoding='UTF-8', names=["sn", "fault_time", "msg", "label"])
@@ -47,7 +47,7 @@ def data_preprocess():
     #     test_x.columns=['label', 'words']
     #     test_x.to_csv('test_data.csv',index=False)
     # 预测
-    f = pd.read_csv(final_test_data_file, encoding='UTF-8', names=["sn", "fault_time", "msg"])
+    f = pd.read_csv(final_test_a_data_file, encoding='UTF-8', names=["sn", "fault_time", "msg"])
     f['words'] = f['msg'].str.replace(r'|', ' ')
     del f['msg']
     del f['sn']
