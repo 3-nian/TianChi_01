@@ -27,7 +27,6 @@ from sklearn.model_selection import  StratifiedKFold
 
 dropout = 0.1
 data_file = '../feature/names_train16.csv'
-
 test_index_file='../feature/test_index.pkl'
 train_index_file='../feature/train_index.pkl'
 final_test_data_file = '../feature/names_test16_a.csv'
