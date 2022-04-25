@@ -1,23 +1,12 @@
 import pandas as pd
 import numpy as np
+from config import *
 
-
-print('data process starting ')
-
-LIMIT = 16                  #先选了LIMIT长度，后去的重，msg<=16
-DUPLICATES = False          #是否去重
-REGULAR = False             #是否正则清洗
-ISPRINT = True              #是否输出文件
-JOIN = True                 #是否用|连接meg内容
-VC = False                  #是否加入venus\crashdump作为msg内容
-filepath = '../data/'
-
-
-
+print('***************data process starting***************')
 
 # 读取文件
-venus = pd.read_csv(filepath + 'preliminary_train/preliminary_venus_dataset.csv',usecols=['sn','fault_time','module_cause','module'])
-crashdump = pd.read_csv(filepath + 'preliminary_train/preliminary_crashdump_dataset.csv',usecols=['sn','fault_time','fault_code'])
+venus = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_venus_dataset.csv',usecols=['sn','fault_time','module_cause','module'])
+crashdump = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_crashdump_dataset.csv',usecols=['sn','fault_time','fault_code'])
 venus['msg'] = venus['module_cause']
 venus['time'] = venus['fault_time']
 venus.drop(columns=['fault_time','module_cause','module'],axis=1,inplace=True)
@@ -25,21 +14,21 @@ crashdump['msg'] = crashdump['fault_code']
 crashdump['time'] = crashdump['fault_time']
 crashdump.drop(columns=['fault_time','fault_code'],axis=1,inplace=True)
 
-left = pd.read_csv(filepath + 'preliminary_train/preliminary_sel_log_dataset.csv',usecols=['sn','time','msg'])
+left = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_sel_log_dataset.csv',usecols=['sn','time','msg'])
 if VC:
     left = pd.concat([left,venus])
     left = pd.concat([left, crashdump])
 
-right_1 = pd.read_csv(filepath + 'preliminary_train/preliminary_train_label_dataset.csv')
-right_2 = pd.read_csv(filepath + 'preliminary_train/preliminary_train_label_dataset_s.csv')
+right_1 = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_train_label_dataset.csv')
+right_2 = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_train_label_dataset_s.csv')
 right = pd.concat([right_1,right_2])
 left.drop_duplicates(keep='last',inplace=True)
 right.drop_duplicates(keep='last',inplace=True)
 ####################################################
-testa_left = pd.read_csv('../tcdata/final_sel_log_dataset_a.csv',usecols=['sn','time','msg'])
-testa_right = pd.read_csv('../tcdata/final_submit_dataset_a.csv')
-testb_left = pd.read_csv('../tcdata/final_sel_log_dataset_b.csv',usecols=['sn','time','msg'])
-testb_right = pd.read_csv('../tcdata/final_submit_dataset_b.csv')
+testa_left = pd.read_csv(TC_DATA_PATH + 'final_sel_log_dataset_a.csv',usecols=['sn','time','msg'])
+testa_right = pd.read_csv(TC_DATA_PATH + 'final_submit_dataset_a.csv')
+testb_left = pd.read_csv(TC_DATA_PATH + 'final_sel_log_dataset_b.csv',usecols=['sn','time','msg'])
+testb_right = pd.read_csv(TC_DATA_PATH + 'final_submit_dataset_b.csv')
 
 # 全连接需要time，label文件里只有fault_time
 right['time']=right['fault_time']
@@ -102,7 +91,6 @@ testa_data['msg'] = testa_data['msg'].str.split('|')
 testb_data['msg'] = testb_data['msg'].str.strip().str.replace(' \| ', '|')
 testb_data['msg'] = testb_data['msg'].str.split('|')
 
-
 # 分组合并msg
 group_ftime = data.groupby([data["sn"],data["fault_time"],data["label"]])['msg'].apply(sum).reset_index()
 ##############################################################
@@ -160,8 +148,6 @@ if JOIN:
     for i in range(testb_group_ftime.shape[0]):
         testb_group_ftime['msg'][i] = '|'.join(testb_group_ftime['msg'][i])
 
-
-
 # 重命名准备输出
 sn_ftime_msg_label = group_ftime
 sn_ftime_msg_label['label'] = sn_ftime_msg_label['label'].astype(int)
@@ -169,24 +155,22 @@ sn_ftime_msg_label['label'] = sn_ftime_msg_label['label'].astype(int)
 testa_sn_ftime_msg_label = testa_group_ftime
 testb_sn_ftime_msg_label = testb_group_ftime
 
-
 # 输出为csv
-featurepath = '../feature/'
 if ISPRINT:
-    sn_ftime_msg_label.to_csv(featurepath + "names_train"+str(LIMIT)+".csv",
+    sn_ftime_msg_label.to_csv(FEATURE_PATH + "names_train"+str(LIMIT)+".csv",
                                header=False, 
                                index=False,
                                columns=['sn','fault_time','msg','label']
                               )
     #############################################################################
-    testa_sn_ftime_msg_label.to_csv(featurepath + "names_test"+str(LIMIT)+"_a.csv",
+    testa_sn_ftime_msg_label.to_csv(FEATURE_PATH + "names_test"+str(LIMIT)+"_a.csv",
                                header=False, 
                                index=False,
                                columns=['sn','fault_time','msg']
                                   )
-    testb_sn_ftime_msg_label.to_csv("names_test"+str(LIMIT)+"_b.csv",
+    testb_sn_ftime_msg_label.to_csv(FEATURE_PATH + "names_test"+str(LIMIT)+"_b.csv",
                                header=False,
                                index=False,
                                columns=['sn','fault_time','msg']
                                   )
-print('data process end ')
+print('***************data process end***************')

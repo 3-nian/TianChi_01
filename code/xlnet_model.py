@@ -1,11 +1,10 @@
-import pandas as pd
 from sklearn.model_selection import train_test_split
 from datasets import load_dataset
 from transformers import PreTrainedTokenizerFast
 from transformers import XLNetForSequenceClassification, TrainingArguments, Trainer
-import numpy as np
-from sklearn.model_selection import  StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from config import *
+
 
 def data_preprocess():
     rawdata = pd.read_csv(train_data_file, encoding='UTF-8', names=["sn", "fault_time", "msg", "label"])
@@ -52,31 +51,12 @@ def data_preprocess():
     del f['msg']
     del f['sn']
     del f['fault_time']
-    f.to_csv('../user_data/final_test_data.csv', index=False)
+    f.to_csv(USER_DATA_PATH + 'final_test_data.csv', index=False)
     return rawdata
 
 
-def compute_metrics(eval_pred):
-    weights = [5 / 11, 4 / 11, 1 / 11, 1 / 11]
-    macro_F1 = 0.0
-    predictions, labels = eval_pred
-    #     [1,2,1,0] batch*1
-    predictions = np.argmax(predictions, axis=1)
-    overall_df = pd.DataFrame()
-    overall_df['label_gt'] = labels
-    overall_df['label_pr'] = predictions
-    for i in range(len(weights)):
-        TP = len(overall_df[(overall_df['label_gt'] == i) & (overall_df['label_pr'] == i)])
-        FP = len(overall_df[(overall_df['label_gt'] != i) & (overall_df['label_pr'] == i)])
-        FN = len(overall_df[(overall_df['label_gt'] == i) & (overall_df['label_pr'] != i)])
-        precision = TP / (TP + FP) if (TP + FP) > 0 else 0
-        recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-        F1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
-        macro_F1 += weights[i] * F1
-    return {'f1': macro_F1}
-
 # 注意这里用了另外一种方式加载Tokenizer
-tokenizer = PreTrainedTokenizerFast(tokenizer_file="../user_data/tokenizer-my-Whitespace.json")
+tokenizer = PreTrainedTokenizerFast(tokenizer_file=USER_DATA_PATH + "tokenizer-my-Whitespace.json")
 tokenizer.mask_token = '[MASK]'
 tokenizer.pad_token = '[PAD]'
 
@@ -85,17 +65,13 @@ def preprocess_function(examples):
     return tokenizer(examples['words'], truncation=True, max_length=Max_len, padding='max_length')
 
 
-model_checkpoint = "../user_data/BERT"  # 所选择的预训练模型
-num_labels = 4
-batch_size = 128
-metric_name = "f1"
-
-
+model_checkpoint = USER_DATA_PATH + "XLNet"  # 所选择的预训练模型
 model = XLNetForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
+
 
 def get_arg(num, train=True):
     train_args = TrainingArguments(
-        '../user_data/' + str(num) + "_test-glue",
+        USER_DATA_PATH + str(num) + "_test-glue",
         evaluation_strategy="epoch",  # 每个epcoh会做一次验证评估；
         save_strategy="epoch",
         logging_dir='test-glue/log',
@@ -108,13 +84,13 @@ def get_arg(num, train=True):
         weight_decay=0.01,
         load_best_model_at_end=True,
         metric_for_best_model=metric_name,  # 根据哪个评价指标选最优模型
-        save_steps=10_000,
+        save_steps=200,
         save_total_limit=2,
         dataloader_drop_last=True
     )
 
     test_args = TrainingArguments(
-        '../user_data/' + str(num) + "_test-glue",
+        USER_DATA_PATH + str(num) + "_test-glue",
         evaluation_strategy="epoch",  # 每个epcoh会做一次验证评估；
         save_strategy="epoch",
         learning_rate=2e-4,
@@ -132,20 +108,20 @@ def get_arg(num, train=True):
 
 
 # 10折交叉验证
-n_splits = 10
-random_state = 2022
 kf = StratifiedKFold(n_splits, shuffle=True, random_state=random_state)
 raw_data = data_preprocess()
+if LOCAL_TEST:
+    raw_data = raw_data.loc[:100, :]
 y = raw_data['label']
 train_loss = []
 test_f1 = []
 best_list = []
 
-X_train, X_test, y_train, y_test = train_test_split(raw_data, y, test_size=0.1, stratify=y)
+X_train, X_test, y_train, y_test = train_test_split(raw_data, y, test_size=0.05, stratify=y)
 
 # 测试集
 X_test.columns = ['label', 'words']
-X_test.to_csv('../user_data/test_data.csv', index=False)
+X_test.to_csv(USER_DATA_PATH + 'test_data.csv', index=False)
 X_train = pd.DataFrame(X_train)
 for epoch in Num_epoch:
     best_f1 = 0.0
@@ -154,17 +130,17 @@ for epoch in Num_epoch:
 
         # 训练集
         train_data.columns = ['label', 'words']
-        train_data.to_csv('../user_data/train_data.csv', index=False)
+        train_data.to_csv(USER_DATA_PATH + 'train_data.csv', index=False)
         # 开发集
         test_data.columns = ['label', 'words']
-        test_data.to_csv('../user_data/dev_data.csv', index=False)
+        test_data.to_csv(USER_DATA_PATH + 'dev_data.csv', index=False)
 
-        dataset = load_dataset('csv', data_files={'train': '../user_data/train_data.csv',
-                                                  'dev': '../user_data/dev_data.csv',
-                                                  'test': '../user_data/test_data.csv'})
+        dataset = load_dataset('csv', data_files={'train': USER_DATA_PATH + 'train_data.csv',
+                                                  'dev': USER_DATA_PATH + 'dev_data.csv',
+                                                  'test': USER_DATA_PATH + 'test_data.csv'})
         encoded_dataset = dataset.map(preprocess_function, batched=True)
 
-        model_checkpoint = "../user_data/BERT"   if k==0 else str(epoch) + "_test-glue"     #所选择的预训练模型
+        model_checkpoint = USER_DATA_PATH + "BERT" if k == 0 else str(epoch) + "_test-glue"  # 所选择的预训练模型
         model = XLNetForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
 
         trainer = Trainer(
@@ -176,9 +152,9 @@ for epoch in Num_epoch:
             compute_metrics=compute_metrics
         )
 
-        # train_result = trainer.train()
-        # loss_train = train_result.training_loss
-        # train_loss.append(loss_train)
+        train_result = trainer.train()
+        loss_train = train_result.training_loss
+        train_loss.append(loss_train)
 
         trainer = Trainer(
             model,
@@ -187,14 +163,13 @@ for epoch in Num_epoch:
             tokenizer=tokenizer,
             compute_metrics=compute_metrics
         )
-        # test_result = trainer.evaluate()
-        # score_test = test_result['eval_f1']
-        # test_f1.append(score_test)
-        # best_list.append(best_f1)
-        # if score_test > best_f1:
-        #     best_f1 = score_test
-        #     trainer.save_model('../user_data/' + str(epoch) + "_test-glue")
-        # print(k, " 折", " train loss:   ", loss_train)
-        print(k, " 折", " best F1:   ", best_f1)
-        # print(k, " 折", " test F1:   ", score_test, '\n')
-
+        score_test = trainer.evaluate()['eval_f1']
+        test_f1.append(score_test)
+        best_list.append(best_f1)
+        if score_test > best_f1:
+            best_f1 = score_test
+            trainer.save_model(USER_DATA_PATH + str(epoch) + "_test-glue")
+        print(
+            '  - {fold:4} fold train loss: {train_loss: 8.5f}, best F1: {best_f1:8.5f} %, test F1: {score_test:8.5f}, '.format(
+                fold=k + 1, train_loss=train_loss,
+                best_f1=best_f1, score_test=score_test))
