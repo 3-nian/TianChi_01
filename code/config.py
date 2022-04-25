@@ -12,8 +12,10 @@ TC_DATA_PATH = '../tcdata/'
 train_data_file = FEATURE_PATH + 'names_train16.csv'
 test_index_file = FEATURE_PATH + 'test_index.pkl'
 train_index_file = FEATURE_PATH + 'train_index.pkl'
-final_test_a_data_file = FEATURE_PATH + 'names_test16_a.csv'
-final_test_b_data_file = FEATURE_PATH + 'names_test16_b.csv'
+preliminary_test_a_data_file = FEATURE_PATH + 'preliminary_test16_a.csv'
+preliminary_test_b_data_file = FEATURE_PATH + 'preliminary_test16_b.csv'
+final_test_a_data_file = FEATURE_PATH + 'final_test16_a.csv'
+final_test_b_data_file = FEATURE_PATH + 'final_test16_b.csv'
 
 # model setting
 dropout = 0.1
@@ -33,6 +35,8 @@ REGULAR = False  # 是否正则清洗
 ISPRINT = True  # 是否输出文件
 JOIN = True  # 是否用|连接meg内容
 VC = False  # 是否加入venus\crashdump作为msg内容
+SUBMIT = False          #是否是提交环节，若是，则会加入tcdata部分
+MILLIONMSG = True       #是否用百万msg生成tokenID
 LOCAL_TEST = False
 
 # cuda setting

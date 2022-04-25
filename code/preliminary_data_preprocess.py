@@ -25,10 +25,10 @@ right = pd.concat([right_1,right_2])
 left.drop_duplicates(keep='last',inplace=True)
 right.drop_duplicates(keep='last',inplace=True)
 ####################################################
-testa_left = pd.read_csv(TC_DATA_PATH + 'final_sel_log_dataset_a.csv',usecols=['sn','time','msg'])
-testa_right = pd.read_csv(TC_DATA_PATH + 'final_submit_dataset_a.csv')
-testb_left = pd.read_csv(TC_DATA_PATH + 'final_sel_log_dataset_b.csv',usecols=['sn','time','msg'])
-testb_right = pd.read_csv(TC_DATA_PATH + 'final_submit_dataset_b.csv')
+testa_left = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_sel_log_dataset_a.csv',usecols=['sn','time','msg'])
+testa_right = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_submit_dataset_a.csv')
+testb_left = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_sel_log_dataset_b.csv',usecols=['sn','time','msg'])
+testb_right = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_submit_dataset_b.csv')
 
 # 全连接需要time，label文件里只有fault_time
 right['time']=right['fault_time']
@@ -101,7 +101,7 @@ testb_group_ftime = testb_data.groupby([testb_data["sn"],testb_data["fault_time"
 if REGULAR:
     #正则清理数据后删除残留碎片
     group_ftime['msg_new'] = ''
-    for i in range(group_ftime.shape[0]): 
+    for i in range(group_ftime.shape[0]):
         box = []
         for j in group_ftime['msg'][i]:
             if j != j.lower():
@@ -109,12 +109,12 @@ if REGULAR:
             else:
                 if len(j) > 30:
                     box.append(j)
-        group_ftime['msg_new'][i] = box 
+        group_ftime['msg_new'][i] = box
     group_ftime['msg'] = group_ftime['msg_new']
     group_ftime.drop(['msg_new'], axis=1, inplace=True)
     #########################################33
     testa_group_ftime['msg_new'] = ''
-    for i in range(testa_group_ftime.shape[0]): 
+    for i in range(testa_group_ftime.shape[0]):
         testa_box = []
         for j in testa_group_ftime['msg'][i]:
             if j != j.lower():
@@ -124,7 +124,7 @@ if REGULAR:
                     testa_box.append(j)
         testa_group_ftime['msg_new'][i] = testa_box
     testa_group_ftime['msg'] = testa_group_ftime['msg_new']
-    testa_group_ftime.drop(['msg_new'], axis=1,inplace=True)     
+    testa_group_ftime.drop(['msg_new'], axis=1,inplace=True)
     testb_group_ftime['msg_new'] = ''
     for i in range(testb_group_ftime.shape[0]):
         testb_box = []
@@ -158,17 +158,17 @@ testb_sn_ftime_msg_label = testb_group_ftime
 # 输出为csv
 if ISPRINT:
     sn_ftime_msg_label.to_csv(FEATURE_PATH + "names_train"+str(LIMIT)+".csv",
-                               header=False, 
+                               header=False,
                                index=False,
                                columns=['sn','fault_time','msg','label']
                               )
     #############################################################################
-    testa_sn_ftime_msg_label.to_csv(FEATURE_PATH + "names_test"+str(LIMIT)+"_a.csv",
-                               header=False, 
+    testa_sn_ftime_msg_label.to_csv(FEATURE_PATH + "premilinary_test"+str(LIMIT)+"_a.csv",
+                               header=False,
                                index=False,
                                columns=['sn','fault_time','msg']
                                   )
-    testb_sn_ftime_msg_label.to_csv(FEATURE_PATH + "names_test"+str(LIMIT)+"_b.csv",
+    testb_sn_ftime_msg_label.to_csv(FEATURE_PATH + "premilinary_test"+str(LIMIT)+"_b.csv",
                                header=False,
                                index=False,
                                columns=['sn','fault_time','msg']

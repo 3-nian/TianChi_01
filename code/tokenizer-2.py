@@ -11,53 +11,51 @@ from tokenizers.trainers import BpeTrainer
 
 # 生成语料集alldata
 def alldata_preprocess():
-    rawdata = pd.read_csv(train_data_file, names=["sn", "fault_time", "msg", "label"])
-    rawdata['words'] = rawdata['msg'].str.replace(r'|', ' ')
+    # train数据集
+    rawdata = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_sel_log_dataset.csv', usecols=['msg'])
     if LOCAL_TEST:
         rawdata = rawdata.loc[:100,:]
-    del rawdata['sn']
-    del rawdata['fault_time']
+    rawdata['words'] = rawdata['msg'].str.replace(r'|', ' ')
     del rawdata['msg']
-    del rawdata['label']
 
-    # 初赛
-    preliminary_test_a_data = pd.read_csv(preliminary_test_a_data_file, names=["sn", "fault_time", "msg"])
+    # addition数据集
+    adddata = pd.read_csv(DATA_PATH + 'preliminary_train/additional_sel_log_dataset.csv', usecols=['msg'])
+    if LOCAL_TEST:
+        adddata = adddata.loc[:100,:]
+    adddata['words'] = adddata['msg'].str.replace(r'|', ' ')
+    del adddata['msg']
+
+    # 初赛数据集
+    preliminary_test_a_data = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_sel_log_dataset_a.csv',usecols=['msg'])
     if LOCAL_TEST:
         preliminary_test_a_data = preliminary_test_a_data.loc[:100, :]
     preliminary_test_a_data['words'] = preliminary_test_a_data['msg'].str.replace(r'|', ' ')
-    del preliminary_test_a_data['sn']
-    del preliminary_test_a_data['fault_time']
     del preliminary_test_a_data['msg']
 
-    preliminary_test_b_data = pd.read_csv(preliminary_test_b_data_file, names=["sn", "fault_time", "msg"])
+    preliminary_test_b_data = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_sel_log_dataset_b.csv',
+                                          usecols=['msg'])
     if LOCAL_TEST:
         preliminary_test_b_data = preliminary_test_b_data.loc[:100, :]
     preliminary_test_b_data['words'] = preliminary_test_b_data['msg'].str.replace(r'|', ' ')
-    del preliminary_test_b_data['sn']
-    del preliminary_test_b_data['fault_time']
     del preliminary_test_b_data['msg']
 
-    all_value = rawdata['words'].append(preliminary_test_a_data['words']).append(preliminary_test_b_data['words'])
-
+    all_value = rawdata['words'].append(adddata['words']).append(preliminary_test_a_data['words']).append(
+        preliminary_test_b_data['words'])
     if SUBMIT:
-        # 决赛
-        final_test_a_data = pd.read_csv(final_test_a_data_file, names=["sn", "fault_time", "msg"])
+        # 决赛数据集
+        final_test_a_data = pd.read_csv(TC_DATA_PATH + 'final_sel_log_dataset_a.csv', usecols=['msg'])
         if LOCAL_TEST:
             final_test_a_data = final_test_a_data.loc[:100,:]
         final_test_a_data['words'] = final_test_a_data['msg'].str.replace(r'|', ' ')
-        del final_test_a_data['sn']
-        del final_test_a_data['fault_time']
         del final_test_a_data['msg']
 
-        final_test_b_data = pd.read_csv(final_test_b_data_file, names=["sn", "fault_time", "msg"])
+        final_test_b_data = pd.read_csv(TC_DATA_PATH + 'final_sel_log_dataset_b.csv', usecols=['msg'])
         if LOCAL_TEST:
             final_test_b_data = final_test_b_data.loc[:100,:]
         final_test_b_data['words'] = final_test_b_data['msg'].str.replace(r'|', ' ')
-        del final_test_b_data['sn']
-        del final_test_b_data['fault_time']
         del final_test_b_data['msg']
 
-        all_value = rawdata['words'].append(final_test_a_data['words']).append(final_test_b_data['words'])
+        all_value = all_value['words'].append(final_test_a_data['words']).append(final_test_b_data['words'])
 
     all_value.to_csv(USER_DATA_PATH + 'alldata.csv', index=False)
 
@@ -81,7 +79,7 @@ trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]
 # 空格分词器
 tokenizer.pre_tokenizer = Whitespace()
 
-if not MILLIONMSG:
+if MILLIONMSG:
     print('***************tokenizer starting***************')
     # 保存语料库文件
     tokenizer.train([USER_DATA_PATH + 'alldata.csv'], trainer)
