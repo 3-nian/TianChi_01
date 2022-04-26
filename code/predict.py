@@ -16,12 +16,12 @@ def preprocess_function(examples):
     return tokenizer(examples['words'], truncation=True, max_length=Max_len, padding='max_length')
 
 
-model_checkpoint = USER_DATA_PATH + "20_test-glue"  # "BERT" #所选择的预训练模型
+model_checkpoint = USER_DATA_PATH + str(Num_epoch[0])+ "_test-glue"  # "BERT" #所选择的预训练模型
 
 model = XLNetForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
 
 test_args = TrainingArguments(
-    USER_DATA_PATH + "20_test-glue",
+    USER_DATA_PATH + str(Num_epoch[0])+ "_test-glue",
     per_device_eval_batch_size=BATCH_SIZE,
     weight_decay=0.01,
     metric_for_best_model=metric_name  # 根据哪个评价指标选最优模型

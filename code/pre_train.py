@@ -50,9 +50,9 @@ training_args = TrainingArguments(
     save_total_limit=2,  # 最多保存两次模型
     prediction_loss_only=True,
     dataloader_drop_last=True,
-    logging_dir=USER_DATA_PATH + 'XLNet/log',
-    logging_strategy="epoch",
-    report_to="tensorboard"
+    # logging_dir=USER_DATA_PATH + 'XLNet/log',
+    # logging_strategy="epoch",
+    # report_to="tensorboard"
 )
 
 trainer = Trainer(

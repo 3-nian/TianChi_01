@@ -81,10 +81,9 @@ trainer = BpeTrainer(special_tokens=["[UNK]", "[CLS]", "[SEP]", "[PAD]", "[MASK]
 # 空格分词器
 tokenizer.pre_tokenizer = Whitespace()
 
-if not MILLIONMSG:
-    print('***************tokenizer starting***************')
-    # 保存语料库文件
-    tokenizer.train([USER_DATA_PATH + 'alldata.csv'], trainer)
-    tokenizer.mask_token = '[MASK]'
-    tokenizer.save(USER_DATA_PATH + "tokenizer-my-Whitespace.json")
-    print('***************tokenizer end***************')
+print('***************tokenizer starting***************')
+# 保存语料库文件
+tokenizer.train([USER_DATA_PATH + 'alldata.csv'], trainer)
+tokenizer.mask_token = '[MASK]'
+tokenizer.save(USER_DATA_PATH + "tokenizer-my-Whitespace.json")
+print('***************tokenizer end***************')

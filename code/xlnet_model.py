@@ -74,9 +74,9 @@ def get_arg(num, train=True):
         USER_DATA_PATH + str(num) + "_test-glue",
         evaluation_strategy="epoch",  # 每个epcoh会做一次验证评估；
         save_strategy="epoch",
-        logging_dir='test-glue/log',
-        logging_strategy="epoch",
-        report_to="tensorboard",
+        # logging_dir='test-glue/log',
+        # logging_strategy="epoch",
+        # report_to="tensorboard",
         learning_rate=2e-4,
         per_device_train_batch_size=BATCH_SIZE,
         per_device_eval_batch_size=BATCH_SIZE,
@@ -140,7 +140,7 @@ for epoch in Num_epoch:
                                                   'test': USER_DATA_PATH + 'test_data.csv'})
         encoded_dataset = dataset.map(preprocess_function, batched=True)
 
-        model_checkpoint = USER_DATA_PATH + "BERT" if k == 0 else str(epoch) + "_test-glue"  # 所选择的预训练模型
+        model_checkpoint = USER_DATA_PATH + "XLNet" if k == 0 else USER_DATA_PATH + str(epoch) + "_test-glue"  # 所选择的预训练模型
         model = XLNetForSequenceClassification.from_pretrained(model_checkpoint, num_labels=num_labels)
 
         trainer = Trainer(
@@ -170,6 +170,6 @@ for epoch in Num_epoch:
             best_f1 = score_test
             trainer.save_model(USER_DATA_PATH + str(epoch) + "_test-glue")
         print(
-            '  - {fold:4} fold train loss: {train_loss: 8.5f}, best F1: {best_f1:8.5f} %, test F1: {score_test:8.5f}, '.format(
-                fold=k + 1, train_loss=train_loss,
+            '  - {fold:4} fold train loss: {loss_train: 8.5f}, best F1: {best_f1:8.5f} , test F1: {score_test:8.5f}, '.format(
+                fold=k + 1, loss_train=loss_train,
                 best_f1=best_f1, score_test=score_test))
