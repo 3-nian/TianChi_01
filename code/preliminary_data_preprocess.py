@@ -42,8 +42,8 @@ if DUPLICATES:
 
 if REGULAR:
     #要不要正则表达式删除数字括号等等
-    testa_data['msg']=testa_data['msg'].str.replace(';',' ').str.replace('[\(\)\d]+','').str.replace('\#\S* ','')    .str.replace('\@\S* ','').str.replace('\&\S* ','').str.replace('\-',' ').str.replace('_',' ').str.replace(',','')
-    testb_data['msg']=testb_data['msg'].str.replace(';',' ').str.replace('[\(\)\d]+','').str.replace('\#\S* ','')    .str.replace('\@\S* ','').str.replace('\&\S* ','').str.replace('\-',' ').str.replace('_',' ').str.replace(',','')
+    testa_data['msg']=testa_data['msg'].str.replace(';',' ').str.replace('[\(\)\d]+','').str.replace('\-',' ').str.replace('_',' ').str.replace(',','')#.str.replace('\#\S* ','').str.replace('\@\S* ','').str.replace('\&\S* ','')
+    testb_data['msg']=testb_data['msg'].str.replace(';',' ').str.replace('[\(\)\d]+','').str.replace('\-',' ').str.replace('_',' ').str.replace(',','')#.str.replace('\#\S* ','').str.replace('\@\S* ','').str.replace('\&\S* ','')
 
 
 # 删除|旁边的空格，按|分割成单词进行清洗

@@ -4,7 +4,7 @@ from config import *
 
 print('***************train data preprocess starting***************')
 
-# 读取文件
+# 读取文件 def
 venus = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_venus_dataset.csv',usecols=['sn','fault_time','module_cause','module'])
 crashdump = pd.read_csv(DATA_PATH + 'preliminary_train/preliminary_crashdump_dataset.csv',usecols=['sn','fault_time','fault_code'])
 venus['msg'] = venus['module_cause']
@@ -30,7 +30,6 @@ right.drop_duplicates(keep='last',inplace=True)
 right['time']=right['fault_time']
 
 
-
 #全连接
 data=pd.merge(left,right,on=['sn','time'],how='outer')
 data.sort_values(by=['sn','time'],ascending=True,ignore_index=True,inplace=True)
@@ -53,7 +52,7 @@ if DUPLICATES:
 
 if REGULAR:
     #要不要正则表达式删除数字括号等等
-    data['msg']=data['msg'].str.replace(';',' ').str.replace('[\(\)\d]+','').str.replace('\#\S* ','')    .str.replace('\@\S* ','').str.replace('\&\S* ','').str.replace('\-',' ').str.replace('_',' ').str.replace(',','')
+    data['msg']=data['msg'].str.replace(';',' ').str.replace('[\(\)\d]+','').str.replace('\-',' ').str.replace('_',' ').str.replace(',','')#.str.replace('\#\S* ','').str.replace('\@\S* ','').str.replace('\&\S* ','')
 
 # 删除|旁边的空格，按|分割成单词进行清洗
 data['msg'] = data['msg'].str.strip().str.replace(' \| ', '|')
